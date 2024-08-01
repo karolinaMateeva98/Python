@@ -1,7 +1,7 @@
 from django.views import generic
 from .models import Post
 from .forms import CommentForm
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 class PostList(generic.ListView):
     queryset = Post.objects.filter(status=1).order_by('-created_on')
@@ -28,3 +28,15 @@ def post_detail(request, slug):
                                            'comments': comments,
                                            'new_comment': new_comment,
                                            'comment_form': comment_form})
+
+def upvote_post(request, slug):
+    post = get_object_or_404(Post, slug=slug)
+    post.upvotes += 1
+    post.save()
+    return redirect('post_detail', slug=post.slug)
+
+def downvote_post(request, slug):
+    post = get_object_or_404(Post, slug=slug)
+    post.downvotes += 1
+    post.save()
+    return redirect('post_detail', slug=post.slug)

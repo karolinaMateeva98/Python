@@ -7,6 +7,16 @@
         <h1>{% block title %} {{ post.title }} {% endblock title %}</h1> 
        <p class=" text-muted">{{ post.author }} | {{ post.created_on }}</p>
         <p class="card-text ">{{ post.content | safe }}</p> 
+
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <a href="{% url 'upvote_post' post.slug %}" class="btn btn-success">Thumbs Up ({{ post.upvotes }})</a>
+            <a href="{% url 'downvote_post' post.slug %}" class="btn btn-danger">Thumbs Down ({{ post.downvotes }})</a>
+          </div>
+          <div>
+            <p>Total Votes: {{ post.total_votes }}</p>
+          </div>
+        </div>
      </div>
     </div> 
    <div class="col-md-8 card mb-4  mt-3 ">
@@ -43,4 +53,21 @@
     </div>
   </div>
 </div>
+<script>
+    function vote(slug, type) {
+        fetch(`/post/${slug}/${type}/`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById(`upvotes-${slug}`).innerText = data.upvotes;
+            document.getElementById(`downvotes-${slug}`).innerText = data.downvotes;
+            document.getElementById(`total-votes-${slug}`).innerText = data.total_votes;
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
 {% endblock content %}
