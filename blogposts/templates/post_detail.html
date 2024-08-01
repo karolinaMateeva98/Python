@@ -17,6 +17,14 @@
             <p>Total Votes: {{ post.total_votes }}</p>
           </div>
         </div>
+        {% if links %}
+            <h3>Links</h3>
+            <ul>
+            {% for link in links %}
+                <li><a href="{{ link.strip }}" target="_blank">{{ link.strip }}</a></li>
+            {% endfor %}
+            </ul>
+        {% endif %}
      </div>
     </div> 
    <div class="col-md-8 card mb-4  mt-3 ">

@@ -17,6 +17,7 @@ class Post(models.Model):
     status = models.IntegerField(choices=STATUS, default=0)
     upvotes = models.PositiveIntegerField(default=0)
     downvotes = models.PositiveIntegerField(default=0)
+    links = models.TextField(blank=True, help_text="Add one or more links, separated by commas.")
     
     class Meta:
         ordering = ['-created_on']
