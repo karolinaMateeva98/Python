@@ -18,6 +18,7 @@ class Post(models.Model):
     upvotes = models.PositiveIntegerField(default=0)
     downvotes = models.PositiveIntegerField(default=0)
     links = models.TextField(blank=True, help_text="Add one or more links, separated by commas.")
+    hashtags = models.TextField(blank=True, null=True) 
     
     class Meta:
         ordering = ['-created_on']
