@@ -8,7 +8,7 @@ class CommentForm(forms.ModelForm):
         fields = ('name', 'email', 'body')
       
 class PostForm(forms.ModelForm):
-    hashtags = forms.ModelMultipleChoiceField(queryset=Hashtag.objects.all(), required=False, widget=forms.CheckboxSelectMultiple)
+    hashtags = forms.CharField(required=False, help_text="Enter hashtags separated by commas")
     
     class Meta:
         model = Post
@@ -17,3 +17,14 @@ class PostForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'rows': 5}),
             'links': forms.TextInput(attrs={'placeholder': 'http://example.com, http://another-link.com'})
         }
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        hashtags_str = self.cleaned_data['hashtags']
+        hashtags_list = [ht.strip() for ht in hashtags_str.split(',')]
+        if commit:
+            instance.save()
+        for tag in hashtags_list:
+            hashtag, created = Hashtag.objects.get_or_create(name=tag)
+            instance.hashtags.add(hashtag)
+        return instance
