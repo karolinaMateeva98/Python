@@ -7,9 +7,13 @@
         <h1>{% block title %} {{ post.title }} {% endblock title %}</h1> 
        <p class=" text-muted">{{ post.author }} | {{ post.created_on }}</p>
         <p class="card-text ">{{ post.content | safe }}</p> 
-       <div>
+        <div>
           <strong>Hashtags:</strong>
-          <p>{{ post.hashtags }}</p>
+          <p>
+            {% for hashtag in post.hashtags.all %}
+              <span class="badge badge-primary">#{{ hashtag.name }}</span>
+            {% endfor %}
+          </p>
         </div>
         <div class="d-flex justify-content-between align-items-center">
           <div>
@@ -64,21 +68,4 @@
     </div>
   </div>
 </div>
-<script>
-    function vote(slug, type) {
-        fetch(`/post/${slug}/${type}/`, {
-            method: 'GET',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById(`upvotes-${slug}`).innerText = data.upvotes;
-            document.getElementById(`downvotes-${slug}`).innerText = data.downvotes;
-            document.getElementById(`total-votes-${slug}`).innerText = data.total_votes;
-        })
-        .catch(error => console.error('Error:', error));
-    }
-</script>
 {% endblock content %}
