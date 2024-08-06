@@ -1,54 +1,56 @@
-from django.views import generic
-from .models import Post
-from .forms import CommentForm, PostForm
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
+from .permissions import IsAdminOrCommentCreator, IsAdminOrOwner, IsPostCreatorOrAdmin
+from django.contrib.auth.models import Group, User
+from rest_framework import permissions, viewsets, generics
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import AllowAny
+from .serializers import UserSerializer
+from .models import Post, Hashtag, Comment
+from .serializers import PostSerializer, HashtagSerializer, CommentSerializer
 
-class PostList(generic.ListView):
-    queryset = Post.objects.order_by('-created_on')
-    template_name = 'index.html'
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = UserSerializer
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
     
-def post_create(request):
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Post created successfully!')
-            return redirect('home') 
-    else:
-        form = PostForm()
-    return render(request, 'post_form.html', {'form': form})
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
 
+    
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
-def post_detail(request, slug):
-    template_name = 'post_detail.html'
-    post = get_object_or_404(Post, slug=slug)
-    links = post.links.split(',') if post.links else []
-    comments = post.comments.filter(active=True)
-    new_comment = None    # Comment posted
-    if request.method == 'POST':
-        comment_form = CommentForm(data=request.POST)
-        if comment_form.is_valid():
-            new_comment = comment_form.save(commit=False)
-            # Assign the current post to the comment
-            new_comment.post = post
-            new_comment.save()
-    else:
-        comment_form = CommentForm()
-    return render(request, template_name, {'post': post,
-                                           'comments': comments,
-                                           'new_comment': new_comment,
-                                           'comment_form': comment_form,
-                                           'links': links})
+class HashtagViewSet(viewsets.ModelViewSet):
+    queryset = Hashtag.objects.all()
+    serializer_class = HashtagSerializer
+    # permission_classes = [permissions.IsAdminUser]
 
-def upvote_post(request, slug):
-    post = get_object_or_404(Post, slug=slug)
-    post.upvotes += 1
-    post.save()
-    return redirect('post_detail', slug=post.slug)
+    def destroy(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
+        return super().destroy(request, *args, **kwargs)
+    
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
-def downvote_post(request, slug):
-    post = get_object_or_404(Post, slug=slug)
-    post.downvotes += 1
-    post.save()
-    return redirect('post_detail', slug=post.slug)
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            self.permission_classes = [IsAdminOrCommentCreator]
+        elif self.action == 'delete':
+            self.permission_classes = [IsPostCreatorOrAdmin]
+        return super().get_permissions()
+
+    def perform_create(self, serializer):
+        serializer.save(name=self.request.user.username)
