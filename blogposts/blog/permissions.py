@@ -8,7 +8,7 @@ class IsAdminOrOwner(permissions.BasePermission):
         # Admins have all permissions
         if request.user.is_staff:
             return True
-        # Owners have permission to edit/delete their own objects
+        # Owners have permission to edit/delete their own posts
         return obj.author == request.user
 
 class IsAdminOrCommentCreator(permissions.BasePermission):
@@ -35,3 +35,9 @@ class IsPostCreatorOrAdmin(permissions.BasePermission):
             return obj.post.author == request.user
         # For other methods, use IsAdminOrCommentCreator permission
         return IsAdminOrCommentCreator().has_object_permission(request, view, obj)
+    
+class IsAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return request.user and request.user.is_staff

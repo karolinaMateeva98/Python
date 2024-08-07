@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group, User
 from rest_framework import serializers
-from .models import Post, Hashtag, Comment
+from .models import Post, Comment, Hashtag, Vote
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -26,13 +26,30 @@ class HashtagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hashtag
         fields = '__all__'
+        
+class VoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vote
+        fields = '__all__'
 
 class PostSerializer(serializers.ModelSerializer):
-    hashtags = HashtagSerializer(many=True, read_only=True)
+    # hashtags = HashtagSerializer(many=True, required=False)
     
     class Meta:
         model = Post
         fields = '__all__'
+        
+    def get_upvotes(self, obj):
+        return obj.votes.filter(vote=Vote.UPVOTE).count()
+
+    def get_downvotes(self, obj):
+        return obj.votes.filter(vote=Vote.DOWNVOTE).count()
+
+    def get_total_votes(self, obj):
+        return self.get_upvotes(obj) - self.get_downvotes(obj)
+
+    def get_comments(self, obj):
+        return obj.comments.count()
     
     # def create(self, validated_data):
     #     hashtags_data = validated_data.pop('hashtags')

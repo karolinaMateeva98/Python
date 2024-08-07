@@ -15,10 +15,10 @@ class Post(models.Model):
     updated_on = models.DateTimeField(auto_now= True)
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
-    upvotes = models.PositiveIntegerField(default=0)
-    downvotes = models.PositiveIntegerField(default=0)
+    # upvotes = models.PositiveIntegerField(default=0)
+    # downvotes = models.PositiveIntegerField(default=0)
     links = models.TextField(blank=True, help_text="Add one or more links, separated by commas.")
-    hashtags = models.ManyToManyField(Hashtag, related_name='posts')
+    # hashtags = models.ManyToManyField(Hashtag, related_name="posts")
     
     class Meta:
         ordering = ['-created_on']
@@ -26,8 +26,32 @@ class Post(models.Model):
     def __str__(self):
         return self.title
     
+    @property
+    def upvotes(self):
+        return self.votes.filter(value=1).count()
+
+    @property
+    def downvotes(self):
+        return self.votes.filter(value=-1).count()
+
+    @property
     def total_votes(self):
-        return self.upvotes - self.downvotes
+        return self.upvotes + self.downvotes
+    
+class Vote(models.Model):
+    UPVOTE = 1
+    DOWNVOTE = -1
+    VOTE_CHOICES = (
+        (UPVOTE, 'Upvote'),
+        (DOWNVOTE, 'Downvote'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='votes')
+    value = models.SmallIntegerField(choices=VOTE_CHOICES)
+
+    class Meta:
+        unique_together = ('user', 'post')
     
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')

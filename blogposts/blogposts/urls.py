@@ -1,13 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.urls import include, path
+from blog import views
 from rest_framework import routers
 
-from tutorial.quickstart import views
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
 
 urlpatterns = [
     path('', include('blog.urls')),
