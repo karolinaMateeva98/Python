@@ -1,6 +1,6 @@
 from .permissions import IsAdminOrCommentCreator, IsAdminOrOwner, IsPostCreatorOrAdmin, IsAdminOrReadOnly
 from django.contrib.auth.models import User
-from rest_framework import permissions, viewsets, generics, filters
+from rest_framework import permissions, viewsets, generics, filters, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import UserSerializer
 from .models import Post, Comment, Hashtag, Vote
 from .serializers import PostSerializer, CommentSerializer, HashtagSerializer
-from .serializers import serializers
+
 
 class PostPagination(PageNumberPagination):
     page_size = 10 
@@ -35,7 +35,6 @@ class PostViewSet(viewsets.ModelViewSet):
     pagination_class = PostPagination
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     search_fields = ['title']
-    # filterset_fields = ['hashtags__name']
     ordering_fields = ['created_on']
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
     
@@ -63,15 +62,12 @@ class PostViewSet(viewsets.ModelViewSet):
         post.vote(request.user, Vote.DOWNVOTE)
         return Response({'status': 'post downvoted'})
 
-# class HashtagViewSet(viewsets.ModelViewSet):
-#     queryset = Hashtag.objects.all()
-#     serializer_class = HashtagSerializer
-#     permission_classes = [IsAdminOrReadOnly]
-
-#     def destroy(self, request, *args, **kwargs):
-#         if not request.user.is_staff:
-#             return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
-#         return super().destroy(request, *args, **kwargs)
+class HashtagViewSet(mixins.ListModelMixin,
+                     mixins.DestroyModelMixin,
+                     viewsets.GenericViewSet):
+    queryset = Hashtag.objects.all()
+    serializer_class = HashtagSerializer
+    permission_classes = [permissions.IsAuthenticated]
     
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()

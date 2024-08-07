@@ -6,6 +6,7 @@ from .views import PostViewSet, CommentViewSet, RegisterView
 router = DefaultRouter()
 router.register(r'posts', PostViewSet)
 router.register(r'comments', CommentViewSet)
+router.register(r'hashtags', views.HashtagViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

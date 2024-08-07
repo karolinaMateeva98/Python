@@ -15,10 +15,8 @@ class Post(models.Model):
     updated_on = models.DateTimeField(auto_now= True)
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
-    # upvotes = models.PositiveIntegerField(default=0)
-    # downvotes = models.PositiveIntegerField(default=0)
     links = models.TextField(blank=True, help_text="Add one or more links, separated by commas.")
-    # hashtags = models.ManyToManyField(Hashtag, related_name="posts")
+    hashtags = models.ManyToManyField(Hashtag, related_name="posts", blank=True)
     
     class Meta:
         ordering = ['-created_on']

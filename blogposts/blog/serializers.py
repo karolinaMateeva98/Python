@@ -21,19 +21,9 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
         fields = ['url', 'name']
-        
-class HashtagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Hashtag
-        fields = '__all__'
-        
-class VoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Vote
-        fields = '__all__'
+    
 
 class PostSerializer(serializers.ModelSerializer):
-    # hashtags = HashtagSerializer(many=True, required=False)
     
     class Meta:
         model = Post
@@ -76,4 +66,18 @@ class PostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
+        fields = '__all__'
+        
+        
+class HashtagSerializer(serializers.ModelSerializer):
+    posts = PostSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Hashtag
+        fields = ['id', 'name', 'posts']
+        
+        
+class VoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vote
         fields = '__all__'
