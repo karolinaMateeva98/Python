@@ -67,7 +67,7 @@ class HashtagViewSet(mixins.ListModelMixin,
                      viewsets.GenericViewSet):
     queryset = Hashtag.objects.all()
     serializer_class = HashtagSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
     
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
