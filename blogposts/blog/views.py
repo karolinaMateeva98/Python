@@ -1,34 +1,17 @@
 from .permissions import IsAdminOrCommentCreator, IsAdminOrOwner, IsPostCreatorOrAdmin, IsAdminOrReadOnly
-from django.contrib.auth.models import User
-from rest_framework import permissions, viewsets, generics, filters, mixins
+from rest_framework import permissions, viewsets, filters, mixins
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from .serializers import UserSerializer
 from .models import Post, Comment, Hashtag, Vote
 from .serializers import PostSerializer, CommentSerializer, HashtagSerializer
-
 
 class PostPagination(PageNumberPagination):
     page_size = 10 
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    permission_classes = (AllowAny,)
-    serializer_class = UserSerializer
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_on')
     serializer_class = PostSerializer

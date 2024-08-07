@@ -2,22 +2,27 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import UserRegisterForm
+from rest_framework.permissions import AllowAny
+from user.models import BlogUser
+from rest_framework import generics, viewsets, permissions
+from .serializers import UserSerializer
+
 
 def index(request):
     return render(request, 'user/index.html', {'title': 'index'})
 
-def register(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'{username}, your account has been created! You are now able to log in.')
-            return redirect('login')
-    else:
-        form = UserRegisterForm()
-    return render(request, 'user/register.html', {'form': form, 'title': 'Register here'})
+class RegisterView(generics.CreateAPIView):
+    queryset = BlogUser.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = UserSerializer
+    
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = BlogUser.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 def user_login(request):
     if request.method == 'POST':
