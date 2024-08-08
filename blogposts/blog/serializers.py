@@ -2,10 +2,10 @@ from rest_framework import serializers
 from .models import Post, Comment, Hashtag, Vote
     
 class PostSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ['id', 'title', 'slug', 'content', 'links', 'hashtags']
+        read_only_fields = ['author', 'created_on']
         
     def get_upvotes(self, obj):
         return obj.votes.filter(vote=Vote.UPVOTE).count()
@@ -14,37 +14,20 @@ class PostSerializer(serializers.ModelSerializer):
         return obj.votes.filter(vote=Vote.DOWNVOTE).count()
 
     def get_total_votes(self, obj):
-        return self.get_upvotes(obj) - self.get_downvotes(obj)
+        return self.get_upvotes(obj) + self.get_downvotes(obj)
 
     def get_comments(self, obj):
         return obj.comments.count()
-    
-    # def create(self, validated_data):
-    #     hashtags_data = validated_data.pop('hashtags')
-    #     post = Post.objects.create(**validated_data)
-    #     for hashtag_data in hashtags_data:
-    #         hashtag, created = Hashtag.objects.get_or_create(**hashtag_data)
-    #         post.hashtags.add(hashtag)
-    #     return post
-
-    # def update(self, instance, validated_data):
-    #     hashtags_data = validated_data.pop('hashtags')
-    #     instance.title = validated_data.get('title', instance.title)
-    #     instance.content = validated_data.get('content', instance.content)
-    #     instance.save()
-
-    #     # Update hashtags
-    #     instance.hashtags.clear()
-    #     for hashtag_data in hashtags_data:
-    #         hashtag, created = Hashtag.objects.get_or_create(**hashtag_data)
-    #         instance.hashtags.add(hashtag)
-
-    #     return instance
         
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['id', 'body', 'post']
+        read_only_fields = ['created_on', 'author']
+    
+    def create(self, validated_data):
+        comment = Comment.objects.create(**validated_data)
+        return comment
         
         
 class HashtagSerializer(serializers.ModelSerializer):
@@ -56,6 +39,20 @@ class HashtagSerializer(serializers.ModelSerializer):
         
         
 class VoteSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='author.username')
+    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
+
     class Meta:
         model = Vote
-        fields = '__all__'
+        fields = ['id', 'user', 'post', 'value']
+        read_only_fields = ['user']
+
+    def validate(self, data):
+        user = self.context.get('user')
+        post = data.get('post')
+        value = data.get('value')
+        
+        if Vote.objects.filter(user=user, post=post, value=value).exists():
+            raise serializers.ValidationError('User can vote only once for a single post.')
+        return data
+    

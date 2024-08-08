@@ -35,9 +35,3 @@ class IsPostCreatorOrAdmin(permissions.BasePermission):
             return obj.post.author == request.user
         # For other methods, use IsAdminOrCommentCreator permission
         return IsAdminOrCommentCreator().has_object_permission(request, view, obj)
-    
-class IsAdminOrReadOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return request.user and request.user.is_staff
