@@ -158,12 +158,13 @@ LOGOUT_REDIRECT_URL = '/'
 
 AUTH_USER_MODEL="user.BlogUser"
 
-CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'
 CELERY_RESULT_BACKEND = 'rpc://' 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 app = Celery('blogposts')
 

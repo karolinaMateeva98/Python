@@ -13,7 +13,6 @@ django-celery-results==2.5.1
 django-crispy-forms==2.3
 django-debug-toolbar==4.4.6
 django-filter==24.3
-django-polls @ file:///Users/karolinamateeva/Desktop/test/python/Python/django-polls/dist/django_polls-0.1.tar.gz#sha256=b41665bcde9a5ebeee427e55877f1606cc67577fee1e05c987929d68b4732a1a
 django-timezone-field==7.0
 djangorestframework==3.15.2
 kombu==5.4.0
