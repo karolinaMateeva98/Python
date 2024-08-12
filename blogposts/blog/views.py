@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Post, Comment, Hashtag, Vote
 from .serializers import PostSerializer, CommentSerializer, HashtagSerializer
+from django.db.models import Count, Q
 
 class HomeViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_on')
@@ -18,12 +19,6 @@ class HomeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
     filterset_fields = ['hashtags']
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        hot = self.request.query_params.get('hot', None)
-        if hot:
-            queryset = queryset.annotate(num_comments=count('comments')).filter(upvotes__gte=5, num_comments__gte=2)
-        return queryset
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_on')
@@ -33,6 +28,24 @@ class PostViewSet(viewsets.ModelViewSet):
     search_fields = ['title']
     ordering_fields = ['created_on']
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
+    filterset_fields = ['hashtags']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Filter by "hot" posts (at least 5 upvotes and at least 2 comments)
+        hot = self.request.query_params.get('hot', None)
+        
+        if hot is not None:
+            queryset = queryset.annotate(
+                upvote_count=Count('votes', filter=Q(votes__value=Vote.UPVOTE)),
+                comment_count=Count('comments')
+            ).filter(
+                upvote_count__gte=5,
+                comment_count__gte=2
+            )
+
+        return queryset
     
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
