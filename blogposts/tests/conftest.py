@@ -2,6 +2,7 @@ import pytest
 from django.utils import timezone
 from user.models import BlogUser
 from blog.models import Hashtag, Post, Vote, Comment
+from rest_framework.test import APIClient
 
 @pytest.fixture
 def blog_user(db):
@@ -42,3 +43,19 @@ def comment(db, blog_user, post):
         body="This is a comment on the first post.",
         created_on=timezone.now()
     )
+
+@pytest.fixture
+def user_data():
+    return {
+        "username": "testuser",
+        "email": "testuser@example.com",
+        "password": "password123"
+    }
+
+@pytest.fixture
+def create_user(db, user_data):
+    return BlogUser.objects.create_user(**user_data)
+
+@pytest.fixture
+def client():
+    return APIClient()

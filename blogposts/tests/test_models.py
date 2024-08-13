@@ -1,5 +1,4 @@
-import pytest
-from blog.models import Post, Vote
+from blog.models import Vote
 
 def test_post_creation(post):
     assert post.title == "My First Post"
