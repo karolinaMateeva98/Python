@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from celery import Celery
-from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -165,12 +164,3 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
-
-app = Celery('blogposts')
-
-app.conf.beat_schedule = {
-    'delete-old-posts-every-day': {
-        'task': 'blog.tasks.delete_old_posts',
-        'schedule': crontab(hour=0, minute=0),  # Runs every day at midnight
-    },
-}
