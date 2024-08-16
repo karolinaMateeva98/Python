@@ -9,23 +9,13 @@ from .models import Post, Comment, Hashtag, Vote
 from .serializers import PostSerializer, CommentSerializer, HashtagSerializer
 from django.db.models import Count, Q
 
-class HomeViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().order_by('-created_on')
-    serializer_class = PostSerializer
-    pagination_class = PostPagination
-    filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
-    search_fields = ['title']
-    ordering_fields = ['created_on']
-    permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
-    filterset_fields = ['hashtags']
-
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_on')
     serializer_class = PostSerializer
     pagination_class = PostPagination
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
-    search_fields = ['title']
+    search_fields = ['title', 'hashtags']
     ordering_fields = ['created_on']
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
     filterset_fields = ['hashtags']

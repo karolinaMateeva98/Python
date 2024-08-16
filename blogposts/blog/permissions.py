@@ -20,7 +20,7 @@ class IsAdminOrCommentCreator(permissions.BasePermission):
         if request.user.is_staff:
             return True
         # Comment creators have permission to edit/delete their own comments
-        return obj.name == request.user.username
+        return obj.author.username == request.user.username
 
 class IsPostCreatorOrAdmin(permissions.BasePermission):
     """
