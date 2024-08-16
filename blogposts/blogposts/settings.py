@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'django_celery_results',
-    'django_celery_beat'
+    'django_celery_beat',
+    'silk',
 ]
 
 # CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'blogposts.urls'

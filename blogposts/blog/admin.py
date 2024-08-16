@@ -3,7 +3,7 @@ from .models import Post, Comment, Hashtag
 
 class PostAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'created_on')
-    search_fields = ['title', 'content', 'hashtags']
+    search_fields = ['title', 'content', 'hashtags__name']
     prepopulated_fields = {'slug': ('title',)}
 
 @admin.register(Comment)

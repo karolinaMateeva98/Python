@@ -15,7 +15,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     pagination_class = PostPagination
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
-    search_fields = ['title', 'hashtags']
+    search_fields = ['title', 'hashtags__name']
     ordering_fields = ['created_on']
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
     filterset_fields = ['hashtags']
